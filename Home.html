@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentine ❤️</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+        .container {
+            position: relative;
+            display: none; /* Ẩn nội dung chính ban đầu */
+        }
+        h1, p, .btn {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .heart {
+            width: 100px;
+            height: 100px;
+            background: red;
+            position: relative;
+            margin: 0 auto 20px auto;
+            transform: rotate(-45deg);
+            animation: heartbeat 2.5s infinite;
+        }
+        .heart:before, .heart:after {
+            content: "";
+            width: 100px;
+            height: 100px;
+            background: red;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .heart:before {
+            top: -50px;
+            left: 0;
+        }
+        .heart:after {
+            left: 50px;
+            top: 0;
+        }
+        @keyframes heartbeat {
+            0% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.1); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: white;
+            color: red;
+            font-size: 1.2rem;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: pink;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+        /* Màn hình chờ */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ffdde1; /* Chuyển thành màu hồng nhạt */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: hotpink;
+        }
+        /* Thanh năng lượng */
+        .energy-bar-container {
+            margin-top: 20px;
+            width: 80%;
+            height: 20px;
+            background: #ffc1e3;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid white;
+            position: relative;
+        }
+        .energy-bar {
+            height: 100%;
+            width: 0%;
+            background: hotpink;
+            transition: width 5s ease-in-out;
+        }
+        .energy-heart {
+            position: absolute;
+            top: -35px; /* Đưa icon lên trên thanh */
+            left: 0;
+            font-size: 30px;
+            transition: left 5s ease-in-out;
+        }
+        .icon-left, .icon-right {
+            position: fixed;
+            font-size: 2rem;
+            animation: float 3s infinite;
+            z-index: 10;
+        }
+
+        .icon-left {
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            animation-direction: alternate;
+        }
+
+        .icon-right {
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            animation-direction: alternate-reverse;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(-50%) translateX(0);
+            }
+            50% {
+                transform: translateY(-50%) translateX(10px);
+            }
+            100% {
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Màn hình loading với thanh năng lượng -->
+    <div id="loading-screen">
+        Đang chuẩn bị bất ngờ... 💖
+        <div class="energy-bar-container">
+            <div class="energy-bar" id="energyBar"></div>
+            <div class="energy-heart" id="energyHeart">❤️</div>
+        </div>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div id="main-content" class="container">
+        <canvas id="fireworks"></canvas>
+        <div class="heart"></div>
+        <h1 id="message1">Happy Valentine ❤️</h1>
+        <p id="message2">Gửi đến người đặc biệt nhất của anh. Chúc em mãi xinh đẹp! 💕</p>
+        <a href="http://127.0.0.1:3000/traitim.html" class="btn" id="giftBtn">Nhận quà 💝</a>
+    </div>
+    <div class="icon-left">✨</div>
+    <div class="icon-right">🌟</div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Lấy phần loading và nội dung chính
+            const loadingScreen = document.getElementById("loading-screen");
+            const mainContent = document.getElementById("main-content");
+
+            // Lấy các phần tử cần hiển thị dần
+            const message1 = document.getElementById("message1");
+            const message2 = document.getElementById("message2");
+            const giftBtn = document.getElementById("giftBtn");
+            const energyBar = document.getElementById("energyBar");
+            const energyHeart = document.getElementById("energyHeart");
+
+            const messages = [message1, message2, giftBtn];
+            let index = 0;
+
+            function showNextMessage() {
+                if (index < messages.length) {
+                    messages[index].style.opacity = "1"; // Hiển thị phần tử
+                    index++;
+                    setTimeout(showNextMessage, 1500); // Hiển thị tiếp sau 1.5s
+                }
+            }
+
+            // Bắt đầu hiệu ứng thanh năng lượng
+            setTimeout(() => {
+                energyBar.style.width = "100%";
+                energyHeart.style.left = "100%";
+            }, 500); // Chờ 0.5s để thanh bắt đầu chạy
+
+            // Sau 5 giây, ẩn màn hình loading và hiển thị nội dung chính
+            setTimeout(() => {
+                loadingScreen.style.display = "none"; // Ẩn loading
+                mainContent.style.display = "block";  // Hiển thị nội dung chính
+                setTimeout(showNextMessage, 1000);   // Bắt đầu hiệu ứng hiển thị từng phần tử
+            }, 5000); // Chờ 5 giây trước khi hiển thị nội dung chính
+        });
+    </script>
+</body>
+</html>
